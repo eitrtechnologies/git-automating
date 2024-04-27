@@ -1,82 +1,103 @@
 # git-automating
 
-Utility script for managing GitLab deploy keys at the group level
+This script helps you manage GitLab deploy keys for projects. 
 
-## Action
+## Description
 
-`add`: Adds a deploy key across all projects included in a group\
-`remove`: Removes a deploy key across all projects included in a group
+This script provides the ability to add or remove deploy keys for GitLab projects within a group or specific project. It introduces a "group level" deploy key application within GitLab's current framework, which typically restricts users to applying deploy keys at the project level.
+
+The script achieves this by taking the group ID (or project ID) as input and traversing the group for projects, then applying or removing the given deploy key accordingly.
+
+## Actions
+
+The script supports two actions:
+
+* `add`: Adds a deploy key 
+* `remove`: Removes a deploy key 
 
 ## Usage
 
-### Adding a deploy key
+### Adding a Deploy Key
 
-To add a deploy key, the following parameters are required:
+**Required Parameters:**
 
-- deploy-key _(-d)_ - the public key of the deploy key to add
-- gitlab-token _(-t)_ - your Gitlab auth token (for authentication with Gitlab API)
-- group-id _(-i)_ - the Gitlab group id 
+* `deploy-key` (`-d`): The public key of the deploy key to add.
+* `gitlab-token` (`-t`):  Your GitLab access token (for authentication with Gitlab API). You can also use the `GITLAB_TOKEN` environment variable.
+* `group-id` (`-i`) or `project-id` (`-p`):  The GitLab group ID or project ID (multiple project IDs can be passed).
 
-optional parameters to consider when using the add functionality:
+**Optional Parameters:**
 
-- export _(-e)_ - prints to stdout the response from the Gitlab API, project name, and script action (add) for each added deploy key
-- deploy-key-name _(-n)_ - the name of the deploy key to add (defaults to Key-YYYY-MM-DD)
-- can-push _(-c)_ - deploy key write permissions (defaults to true)
-- gitlab-url _(-g)_ - Gitlab API URL (defaults to https://gitlab.com/api/v4)
-- gitlab-headers (-H) - Gitlab API headers (defaults to `{"PRIVATE-TOKEN": <gitlab_token>}`)
+* `export` (`-e`): Prints the response from the GitLab API, project name, and script action to the console for each deploy key.
+* `deploy-key-name` (`-n`): The name of the deploy key to add (defaults to `Key-YYYY-MM-DD`).
+* `can-push` (`-c`):  Set deploy key write permissions (defaults to `true`).
+* `gitlab-url` (`-g`):  Set the GitLab API URL (defaults to `https://gitlab.com/api/v4`).
+* `gitlab-headers` (`-H`):  Set GitLab API headers (defaults to `{"PRIVATE-TOKEN": <gitlab_token>}`).
+* `recursive` (`-r`): Include subgroups within a group.
 
-__Example:__
 
-```
-python git-deploy-key.py add -e -n test -t <your-token> -d "ssh-rsa AAAA..." -i 123
-```
-
-_or_
+**Example Add**
 
 ```
-python git-deploy-key.py add --export --gitlab-token <your-token> --deploy-key-name test --deploy-key "ssh-rsa AAAA..." --group-id 123
+git-deploy-key.py add -er -n test -t <gitlab-auth-token> -d "ssh-rsa AAAA..." -i 12345
 ```
 
+**Example Add with Multiple Project IDs**
+
+```
+git-deploy-key.py add -er -n test -t <gitlab-auth-token> -d "ssh-rsa AAAA..." -p 45678 87542
+```
+
+### Using Environment Vars
+---
+To use environment variables, export your GitLab authentication token and/or the GitLab deploy key that you want to add or remove from your projects:
+
+```
+export GITLAB_TOKEN="super-secret-gitlab-auth-key"
+export GITLAB_DEPLOY_KEY="ssh-rsa AAAA..."
+```
+
+**Example Running Script with Environment Vars**
+
+```
+git-deploy-key.py add -er -n test -i 12345
+```
+---
 
 ### Removing a deploy key
 
-To remove a deploy key, the following parameters are required:
+* `deploy-key-name` (`-n`): The name of the deploy key to remove
+* `gitlab-token` (`-t`):  Your GitLab access token (for authentication with Gitlab API). You can also use the `GITLAB_TOKEN` environment variable.
+* `group-id` (`-i`) or `project-id` (`-p`):  The GitLab group ID or project ID (multiple project IDs can be passed).
 
-- deploy-key-name _(-n)_ - the name of the deploy key to add
-- gitlab-token _(-t)_ - your Gitlab auth token (for authentication with Gitlab API)
-- group-id _(-i)_ - the Gitlab group id 
+**Optional Parameters:**
 
-optional parameters to consider when using the remove functionality:
+* `export` (`-e`): Prints the response from the GitLab API, project name, and script action to the console for each deploy key.
+* `can-push` (`-c`):  Set deploy key write permissions (defaults to `true`).
+* `gitlab-url` (`-g`):  Set the GitLab API URL (defaults to `https://gitlab.com/api/v4`).
+* `gitlab-headers` (`-H`):  Set GitLab API headers (defaults to `{"PRIVATE-TOKEN": <gitlab_token>}`).
+* `recursive` (`-r`): Include subgroups within a group.
 
-- export _(-e)_ - prints to stdout the response from the Gitlab API, project name, and script action (remove) for each removed deploy key 
-- gitlab-url _(-g)_ - Gitlab API URL (defaults to https://gitlab.com/api/v4)
-- gitlab-headers _(-H)_ - Gitlab API headers (defaults to {"PRIVATE-TOKEN": <gitlab_token>})
-
-__Example__:
-
-```
-python git-deploy-key.py remove -e -n test -t <your-token> -t "ssh-rsa AAAA..." -i 123
-```
-
-_or_
+**Example Remove**
 
 ```
-python git-deploy-key.py remove --export --deploy-key-name test --gitlab-token <your-token> --group-id 123
+git-deploy-key.py remove -er -n test -t <gitlab-auth-token> -i 12345
 ```
 
+## All Options
 
-### All Options:
-
-- deploy-key-name, _-n_: Gitlab deploy key name. Defaults to Key-YYYY-MM-DD.
-- deploy-key, _-d_: Gitlab deploy key ID.
-- gitlab-token, _-t_: Gitlab access token.
-- group-id, _-i_: Gitlab group ID.
-- gitlab-url, _-g_: Gitlab API URL. Defaults to https://gitlab.com/api/v4.
-- gitlab-headers, _-H_: Gitlab API headers. Defaults to {"PRIVATE-TOKEN": <gitlab_token>}.
-- can-push, _-c_: Deploy key write permissions. Defaults to true.
-- export, _-e_: prints to stdout the response from the Gitlab API, project name, and script action for each deploy key
-
+| Option (Short Flag) | Long Flag | Description | Default Value |
+|---|---|---|---|
+| -n | --deploy-key-name | GitLab deploy key name. | Key-YYYY-MM-DD |
+| -d | --deploy-key | GitLab deploy key ID. | GITLAB_DEPLOY_KEY environment variable or None |
+| -t | --gitlab-token | GitLab access token. | GITLAB_TOKEN environment variable or None |
+| -i | --group-id | GitLab group ID. | - |
+| -p | --project-id | GitLab project ID. | - |
+| -g | --gitlab-url | GitLab API URL. | [https://gitlab.com/api/v4](https://gitlab.com/api/v4) |
+| -H | --gitlab-headers | GitLab API headers. | {"PRIVATE-TOKEN": <gitlab_token>} |
+| -c | --can-push | Deploy key write permissions. | true |
+| -e | --export | Print response from GitLab API, project name, and script action. | - |
+| -r | --recursive | Include subgroups within a group. | - |
 
 ## Note:
 
-- If --export (-e) is not included as an arg when executing the script, a successful run will not print anything. However, if an error is hit during executing a log message will still print
+- If --export (-e) is not included as an arg when executing the script, a successful run will not print anything to the console. However, if an error is hit during executing a log message will still print.
