@@ -4,9 +4,9 @@ This script helps you manage GitLab deploy keys for projects.
 
 ## Description
 
-This script provides the ability to add or remove deploy keys for GitLab projects within a group or specific project. It introduces a "group level" deploy key application within GitLab's current framework, which typically restricts users to applying deploy keys at the project level.
+This script provides the ability to add or remove deploy keys for GitLab projects within a group or specific project (or list of projects). It introduces functionaility akin to a "group level" deploy key feature within GitLab's current framework.
 
-The script achieves this by taking the group ID (or project ID) as input and traversing the group for projects, then applying or removing the given deploy key accordingly.
+The script achieves this by taking the group ID (or project ID) as input and traversing the group for projects, then applying or removing the given deploy key accordingly at the project level. Based on input, the script can look recursively through subgroups, or just apply deploy keys to a single project or list of projects directly.
 
 ## Actions
 
