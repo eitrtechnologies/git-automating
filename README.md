@@ -28,6 +28,7 @@ The script supports two actions:
 **Optional Parameters:**
 
 * `export` (`-e`): Prints the response from the GitLab API, project name, and script action to the console for each deploy key.
+* `expires-at` (`-x`): Expiration date of the deploy key to add, defaults to None, (Expected in ISO 8601 format (2019-03-15T08:00:00Z)'
 * `deploy-key-name` (`-n`): The name of the deploy key to add (defaults to `Key-YYYY-MM-DD`).
 * `can-push` (`-c`):  Set deploy key write permissions (defaults to `true`).
 * `gitlab-url` (`-g`):  Set the GitLab API URL (defaults to `https://gitlab.com/api/v4`).
@@ -38,13 +39,13 @@ The script supports two actions:
 **Example Add**
 
 ```
-git-deploy-key.py add -er -n test -t <gitlab-auth-token> -d "ssh-rsa AAAA..." -i 12345
+python git-deploy-key.py add -er -n test -t <gitlab-auth-token> -d "ssh-rsa AAAA..." -i 12345
 ```
 
 **Example Add with Multiple Project IDs**
 
 ```
-git-deploy-key.py add -er -n test -t <gitlab-auth-token> -d "ssh-rsa AAAA..." -p 45678 87542
+python git-deploy-key.py add -er -n test -t <gitlab-auth-token> -d "ssh-rsa AAAA..." -p 45678 87542
 ```
 
 ### Using Environment Vars
@@ -59,13 +60,13 @@ export GITLAB_DEPLOY_KEY="ssh-rsa AAAA..."
 **Example Running Script with Environment Vars**
 
 ```
-git-deploy-key.py add -er -n test -i 12345
+python git-deploy-key.py add -er -n test -i 12345
 ```
 ---
 
 ### Removing a deploy key
 
-* `deploy-key-name` (`-n`): The name of the deploy key to remove
+* `deploy-key-name` (`-n`) or `deploy-key` (`-n`): The name of the deploy key or the ssh key value to remove. Note: if using ssh key value you must include the (`-D`) flag, otherwise it will only remove by deploy key name.
 * `gitlab-token` (`-t`):  Your GitLab access token (for authentication with Gitlab API). You can also use the `GITLAB_TOKEN` environment variable.
 * `group-id` (`-i`) or `project-id` (`-p`):  The GitLab group ID or project ID (multiple project IDs can be passed).
 
@@ -76,11 +77,18 @@ git-deploy-key.py add -er -n test -i 12345
 * `gitlab-url` (`-g`):  Set the GitLab API URL (defaults to `https://gitlab.com/api/v4`).
 * `gitlab-headers` (`-H`):  Set GitLab API headers (defaults to `{"PRIVATE-TOKEN": <gitlab_token>}`).
 * `recursive` (`-r`): Include subgroups within a group.
+* `remove-by-key` (`-D`): remove deploy key based off of ssh key value (defaults to `true`)
 
-**Example Remove**
+**Example Remove by Deploy Key Name Only**
 
 ```
-git-deploy-key.py remove -er -n test -t <gitlab-auth-token> -i 12345
+python git-deploy-key.py remove -er -n test -t <gitlab-auth-token> -i 12345
+```
+
+**Example Remove by Deploy Key Value**
+
+```
+python git-deploy-key.py remove -Dd "ssh-rsa AAAA..." -t <gitlab-auth-token> -i 12345 
 ```
 
 ## All Options
@@ -97,7 +105,10 @@ git-deploy-key.py remove -er -n test -t <gitlab-auth-token> -i 12345
 | -c | --can-push | Deploy key write permissions. | true |
 | -e | --export | Print response from GitLab API, project name, and script action. | - |
 | -r | --recursive | Include subgroups within a group. | - |
+| -x | --expires-at | Deploy key expiration date | None |
+| -D | --remove-by-key | remove deploy key based off of ssh key value (defaults to `true`) | true |
 
 ## Note:
 
+- Tested on https://gitlab.com/api/v4 version
 - If --export (-e) is not included as an arg when executing the script, a successful run will not print anything to the console. However, if an error is hit during executing a log message will still print.
